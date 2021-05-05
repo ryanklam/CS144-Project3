@@ -8,22 +8,27 @@ const jwt_key = 'C-UFRaksvPKhx1txJYFcut3QGxsafPmwCY6SCly3G6c';
 /* GET */
 router.get('/posts', function(req, res, next) {
     let username = req.query.username;
-    let postid = parseInt(req.query.postid);
+    let postid = req.query.postid;
     let blogposts = client.db('BlogServer');
 
     if (username == null) {
         res.status(400).send('Bad request');
-    } else if (username && postid) {
-        blogposts.collection('Posts').findOne({username : username, postid : postid})
-        .then((post) => {
-            if (post == null) {
-                res.status(404).send('Post not found');
-            } else {
-                delete post.username;
-                delete post._id;
-                res.status(200).json(post);
-            }
-        });
+    } else if (username != null && postid != null) {
+        postid = parseInt(postid);
+        if (isNaN(postid) || postid < 0) {
+            res.status(400).send('Bad request');
+        } else {
+            blogposts.collection('Posts').findOne({username : username, postid : postid})
+            .then((post) => {
+                if (post == null) {
+                    res.status(404).send('Post not found');
+                } else {
+                    delete post.username;
+                    delete post._id;
+                    res.status(200).json(post);
+                }
+            });
+        }
     } else {
         blogposts.collection('Posts').find({username : username}).toArray()
         .then((posts) => {
@@ -64,7 +69,7 @@ router.post('/posts', function(req, res, next) {
     let body = req.body.body;
     let blogposts = client.db('BlogServer');
 
-    if (username == null || isNaN(postid) || title == null || body == null) {
+    if (username == null || postid == null || isNaN(postid) || title == null || body == null) {
         res.status(400).send('Bad request');
     } else if (postid == 0) {
         blogposts.collection('Users').findOne({username : username})
@@ -74,7 +79,7 @@ router.post('/posts', function(req, res, next) {
             } else {
                 let maxid = user.maxid + 1;
                 let curtime = Date.now();
-                let newpost = {postid: maxid, username: username, created: curtime, modified: curtime, title: title, body: body};
+                let newpost = {"postid": maxid, "username": username, "created": curtime, "modified": curtime, "title": title, "body": body};
                 try {
                     blogposts.collection('Posts').insertOne(newpost);
                 } catch (e) {
@@ -85,7 +90,7 @@ router.post('/posts', function(req, res, next) {
                 } catch (e) {
                     console.log(e);
                 }
-                let response = {postid : maxid, created : curtime, modified : curtime};
+                let response = {"postid" : maxid, "created" : curtime, "modified" : curtime};
                 res.status(201).json(response);
             }
         });
@@ -96,7 +101,7 @@ router.post('/posts', function(req, res, next) {
             if (result.modifiedCount < 1) {
                 res.status(404).send('Post not found');
             } else {
-                let response = {modified: curtime};
+                let response = {"modified": curtime};
                 res.status(200).json(response);
             }
         });
