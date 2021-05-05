@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Login</h1>
+    <form action='/login' method='POST'>
+        <% if (redirect !== undefined) { %>
+            <input type='hidden' name='redirect' value=<%= redirect %>>
+        <% } %>
+        <% let usr = '';
+            let pwd = '';
+            if (username) {
+              usr = username;
+            }
+            if (password) {
+              pwd = password;
+            }
+          %>
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value=<%= usr %>>
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" value=<%= pwd %>>
+        </div>
+        <div>
+            <button class="button" type="submit">Submit</button>
+        </div>
+    </form>
+  </body>
+</html>
